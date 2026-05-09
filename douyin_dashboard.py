@@ -29,7 +29,14 @@ DATA_FILE = Path(r"C:\RPAWorkspace\抖音视频数据汇总.xlsx")
 def load_data(file_path):
     """加载Excel，返回原始DataFrame（中文列名）"""
     if not file_path.exists():
-        st.error(f"❌ 文件不存在: {file_path}\n请确保文件已放置在指定目录。")
+        st.error(f"❌ 文件不存在: {file_path}")
+        # 打印目录下实际文件，帮助用户排查
+        parent_dir = file_path.parent
+        if parent_dir.exists():
+            files = [f.name for f in parent_dir.iterdir() if f.is_file()]
+            st.write(f"目录 `{parent_dir}` 中的文件：{files}")
+        else:
+            st.error(f"目录 `{parent_dir}` 本身不存在，请检查路径。")
         return pd.DataFrame()
     try:
         df = pd.read_excel(file_path, engine='openpyxl')
@@ -148,17 +155,17 @@ def main():
         tab1, tab2 = st.tabs(["📦 发布数量 Top10", "❤️ 总点赞数 Top10"])
         with tab1:
             top_publish = author_df.sort_values('发布数量', ascending=False).head(10)
-            st.dataframe(top_publish, use_container_width=True)
+            st.dataframe(top_publish, width='stretch')
             fig_pub = px.bar(top_publish, x='作者昵称', y='发布数量', title="发布数量 Top10 作者",
                              text_auto=True, color='发布数量')
-            st.plotly_chart(fig_pub, use_container_width=True)
+            st.plotly_chart(fig_pub, width='stretch')
         with tab2:
             if '总点赞数' in author_df.columns:
                 top_likes = author_df.sort_values('总点赞数', ascending=False).head(10)
-                st.dataframe(top_likes, use_container_width=True)
+                st.dataframe(top_likes, width='stretch')
                 fig_likes = px.bar(top_likes, x='作者昵称', y='总点赞数', title="总点赞数 Top10 作者",
                                    text_auto=True, color='总点赞数')
-                st.plotly_chart(fig_likes, use_container_width=True)
+                st.plotly_chart(fig_likes, width='stretch')
             else:
                 st.info("数据中不含点赞数，无法展示点赞榜。")
     else:
@@ -209,7 +216,7 @@ def main():
                 author_status = author_status[author_status['当天发布数'] > 0]
 
             st.write(f"### {selected_date} 作者发布情况 (共 {len(author_status)} 位)")
-            st.dataframe(author_status, use_container_width=True)
+            st.dataframe(author_status, width='stretch')
 
             total_authors = len(all_authors)
             published_authors = len(daily_stats)
@@ -230,9 +237,9 @@ def main():
         preview_df = raw_filtered
     show_all = st.checkbox("显示全部数据（默认仅显示前100行）")
     if show_all:
-        st.dataframe(preview_df, use_container_width=True)
+        st.dataframe(preview_df, width='stretch')
     else:
-        st.dataframe(preview_df.head(100), use_container_width=True)
+        st.dataframe(preview_df.head(100), width='stretch')
 
     st.sidebar.markdown("---")
     st.sidebar.subheader("📌 说明")
